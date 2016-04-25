@@ -19,8 +19,6 @@
 
 - name: Make swap file
   command: "mkswap {{ swap_file_path }}"
-  become: yes
-  become_user: root
   when: swapfile.stdout.find('swap file') == -1
   tags: swap.file.mkswap
 

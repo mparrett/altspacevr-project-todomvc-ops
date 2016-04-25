@@ -18,6 +18,11 @@
             backup=yes
   notify: reload nginx
 
+- name: Create the Nginx stats configuration file
+  template: src=nginx_status_config.j2
+            dest=/etc/nginx/sites-available/nginx_status
+  notify: reload nginx
+
 - name: Ensure that the default site is disabled
   file: path=/etc/nginx/sites-enabled/default state=absent
   notify: reload nginx
@@ -25,6 +30,12 @@
 - name: Ensure that the application site is enabled
   file: src=/etc/nginx/sites-available/{{ application_name }}
         dest=/etc/nginx/sites-enabled/{{ application_name }}
+        state=link
+  notify: reload nginx
+
+- name: Ensure that the status site is enabled
+  file: src=/etc/nginx/sites-available/nginx_status
+        dest=/etc/nginx/sites-enabled/nginx_status
         state=link
   notify: reload nginx
 
