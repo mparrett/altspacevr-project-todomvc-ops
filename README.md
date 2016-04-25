@@ -5,7 +5,7 @@
 
 This is a sample Django TodoMVC application running in a fairly simple Ubuntu 14.04 environment.
 
-Nginx is used as a reverse proxy for gunicorn which runs the python app in a virtualenv. Supervisor is used to monitor and control gunicorn and Postgresql is used for persistence.
+Nginx is used as a reverse proxy with SSL termination in front of gunicorn, which runs the python app in a virtualenv. Supervisor is used to monitor and control gunicorn and Postgresql is used for persistence.
 
 Currently, one machine is provisioned for the web server and another for the database. To be kind to aging Macbooks, the Vagrant Virtualbox VMs are given minimal memory resources.
 
