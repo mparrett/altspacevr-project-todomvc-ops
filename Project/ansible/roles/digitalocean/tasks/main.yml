@@ -1,0 +1,35 @@
+---
+
+# Provision the Digital Ocean droplets
+
+- name: Provision Digital Ocean Droplet - Web 1 
+  digital_ocean:
+    state: present
+    ssh_key_ids: "{{ digitalocean_ssh_key_ids }}"
+    api_token: "{{ lookup('env', 'DO_API_TOKEN') }}"
+    name: altvr-web
+    size_id: 512mb 
+    region_id: sfo1
+    image_id: ubuntu-14-04-x64
+    unique_name: yes
+    private_networking: yes
+  register: altvr_web
+
+- name: Debug Web 1
+  debug: msg="altvr-web ID is {{ altvr_web.droplet.id }}, IP is {{ altvr_web.droplet.ip_address }}"
+
+- name: Provision Digital Ocean Droplet - DB 1 
+  digital_ocean:
+    state: present
+    ssh_key_ids: "{{ digitalocean_ssh_key_ids }}"
+    api_token: "{{ lookup('env', 'DO_API_TOKEN') }}"
+    name: altvr-db
+    size_id: 512mb
+    region_id: sfo1
+    image_id: ubuntu-14-04-x64
+    unique_name: yes
+    private_networking: yes
+  register: altvr_db
+
+- name: Debug DB 1
+  debug: msg="altvr-db ID is {{ altvr_db.droplet.id }}, IP is {{ altvr_db.droplet.ip_address }}"

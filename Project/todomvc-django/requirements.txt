@@ -3,3 +3,9 @@ Django==1.6.1
 
 # Libs 
 djangorestframework==2.3.13
+
+# Postgresql
+psycopg2==2.6.1
+
+# Required for gunicorn + datadog
+setproctitle==1.1.9

@@ -1,0 +1,13 @@
+---
+
+- name: Provision a db server for {{ application_name }}
+  hosts: dbservers
+  vars:
+    - update_apt_cache: yes
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/{{ env }}.yml
+
+  roles:
+    - base
+    - db

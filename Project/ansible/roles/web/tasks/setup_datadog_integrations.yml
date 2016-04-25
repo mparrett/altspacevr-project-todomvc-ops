@@ -1,0 +1,5 @@
+---
+
+- name: Add Datadog gunicorn metrics template
+  template: src=../templates/gunicorn.yaml.j2 dest=/etc/dd-agent/conf.d/gunicorn.yaml
+  notify: restart datadog

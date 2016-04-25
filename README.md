@@ -1,45 +1,103 @@
-# Altspace Programming Project - TodoMVC Operations
+# AltspaceVR Project - TodoMVC Operations
 
-## Instructions
 
-Create a small virtualized/containerized environment to run a TodoMVC app.
+## Overview
 
-## Goals
+This is a sample Django TodoMVC application running in a moderately simple environment.
 
-We use this project to get a sense of your operational chops and what kinds of approaches you take to typical problems seen in web operations. When we receive the project, here is what we will be asking ourselves:
+Nginx is used as a reverse proxy for gunicorn which runs the python application in a virtualenv. Supervisor is used to monitor and control gunicorn. Postgresql is used for persistence.
 
-- Does the project work? Can we get TodoMVC running in one command?
-- Do the scripts provision, configure, and launch the necessary services cleanly?
-- Are the scripts and the overall project well organized and clean?
-- Are the extras bits included set up properly? Are they useful, relevant, or just plain cool? 
+Currently, one machine is provisioned for the web server and another for the database. To be kind to aging Macbooks, the Virtualbox VMs were given minimal memory resources. The instructions below were written with MacOS in mind, but could be adapted to other platforms.
 
-To work on the project:
+### Design Decisions / Principles
 
-* Fork and clone the repo.
-* Create a new folder called "Project" where you will put your work.
+Priority was given to keeping the moving parts to a minimum and embracing reliable tools in order to deliver a working demonstration within a reasonable amount of time. The project attempts to be well organized and follow best practices wherever possible. Maintaining parity between local and remote environments is demonstrated. Chunks of existing playbooks were utilized rather than writing everything from scratch. It seems quite reasonable that this basic setup could eventually evolve into a containerized version.
 
-## Requirements
+### Provisioning and Configuration
 
-In this repo in the `todomvc` folder you'll find three implementations of TodoMVC, a simple to-do application. The three implementations are implemented in Django (Python), Rails (Ruby), or node.js (Javascript.)
+Ansible is used to provision and configure the resources for the TodoMVC app. Dynamic Ansible inventories are utilized and both Vagrant and Digital Ocean were tested as providers. Extending to AWS would be straightforward.
 
-Using tools like Vagrant and Docker, set up a virtual or containerized environment that runs the application that consists of at least 2 logical machines/containers talking to one another: one hosting the application server and one hosting the database. For the database, you can choose to use either MongoDB (for the node.js project) or MySQL or PostgreSQL for the Rails or Django projects. Feel free to configure or customize the application and database to suit your needs.
+## Getting Started
 
-In addition to getting the basic system running, include some more stuff to showcase your skill and creativity. This is your chance to blow us away!
+Make sure the requirements below are met and then get TodoMVC running on your system with one command (after cloning).
 
-Some ideas:
+```
+git clone git@github.com:mparrett/altvr-todomvc-django.git
+cd altvr-todomvc-django
+```
 
-- A basic monitoring/alerting setup.
+```
+vagrant up
+```
 
-- A simple deployment process for new code.
+And once that's done, visit [https://192.168.33.15](https://192.168.33.15) and enjoy some TODOs.
 
-- Anything else you think would showcase your abilities as an operations engineer. Been wanting to try a new tool, scripting language, or library? Go for it!
+### Requirements
 
-## Deliverable
+- Ansible 1.9+ `pip install ansible --upgrade`
+- Virtualbox (Local) `brew cask install virtualbox`
+- Vagrant (Local) `https://www.vagrantup.com/downloads.html`
 
-In your repo, you should clobber this README file with your own that describes the overall system architecture, how to get it up and running, details on the additional things you included like monitoring or deployment, and any design decisions you made that you think would be helpful for us to understand. Also, include a brief overview of limitations or next steps you’d take if you wanted to deploy this system to production.
+### Extra Requirements for Digital Ocean
 
-E-mail us a link to your Github repo to projects@altvr.com. Please include your contact information, and if you haven't submitted it to us already, your resume and cover letter.
+When running on Digital Ocean you'll need to do a couple of things to enable the dynamic inventory script `digital_ocean.py` to access your account.
 
-We hope you have fun working on the project, and we can't wait to see what you come up with!
-    
-[The Altspace Team](http://altvr.com/team/)
+```
+pip install dopy
+export DO_API_TOKEN=YOUR_TOKEN
+ansible-playbook -i digital_ocean.py digitalocean.yml --user YOUR_USER --extra-vars 'digitalocean_ssh_key_ids=123'
+```
+
+You can also access TodoMVC hosted on my Digital Ocean account here:
+
+[https://107.170.252.197/](https://107.170.252.197/)
+
+## Code Deployment
+
+A simple git-based deployment system is used to deploy new code during development. The repository is configured via ansible variables and can be deployed via `ansible-playbook vagrant.yml --tags=deploy`. By default this deploys the `master` branch but this is configurable via ansible variables.
+
+The sample Django app provided with the challenge is here on [GitHub](https://github.com/mparrett/altvr-todomvc-django) and was slightly modified to meet the requirements.
+
+## Monitoring with Datadog
+
+The project demonstrates basic Datadog integration for monitoring and alerting.
+
+![](http://i.imgur.com/nuAGoDa.png)
+
+### Integrations
+
+Included in the demo are Nginx, gunicorn, and Postgresql integrations which include many interesting and useful metrics. In addition, gunicorn is configured to speak via StatsD to the local Datadog agent.
+
+### Alerts
+
+A sample alert was created which informs us if the gunicorn worker count drops below the configured amount (3). This could be connected to PagerDuty and Slack.
+
+![](http://i.imgur.com/JZSjm5W.png)
+
+### Events
+
+TODO: Deployment events could be sent to DataDog so they can be overlaid on appropriate dashboards and correlated with changes.
+
+
+## Production Considerations
+
+This sample development environment demonstration is rather basic and would at least require a handful of considerations before promoted to a production environment:
+
+- Basic production considerations (DNS, SSL cert, desired cloud provider, CDN, budget constraints, etc.)
+- Secure/harden machines and software
+- Load/stability testing
+- Design an implement a deployment pipeline (or more likely integrate with an existing one)
+
+## Next Steps
+
+Architecturally, a next step for production readiness is to split out nginx onto its own instance (possibly multiple behind round robin DNS if high availability is desired) and use it to load balance to multiple upstream web instances over TCP. Depending on the scale, Postgres connections may become a limiting factor and `pgbouncer` could be investigated for connection pooling between the web instances and the database. Putting the load balancer behind an elastic IP should also be considered.
+
+Other thoughts:
+
+- Evalulate pros and cons of using containers
+- Evaluate producing deployable artifacts using Packer to reduce environment build time and for future integration with a CI pipeline
+- Assess availability requirements, failover plan, and backup strategy
+
+## Thanks
+
+It was a pleasure to work on this challenge. Thanks for taking the time to evaluate my work!

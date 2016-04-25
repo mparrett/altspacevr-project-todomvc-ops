@@ -1,0 +1,10 @@
+init_config:
+
+instances:
+   -   host: {{ hostvars[groups['altvr-db'][0]].ansible_eth1.ipv4.address }}
+       port: 5432
+       username: datadog
+       password: {{ datadog_postgres_password }}
+       tags:
+            - role:db
+            - env:{{ env }}

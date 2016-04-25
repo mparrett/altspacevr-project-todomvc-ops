@@ -1,0 +1,46 @@
+---
+
+# Provisions Digital Ocean droplets and configures them
+# for the sample Django Todomvc project
+
+# Note: Some issue with MacOS (probably homebrew-related)
+# is currently preventing DO_API_TOKEN from being
+# inherited after an export DO_API_TOKEN=
+# The lookup() below is a workaround.
+# Otherwise errors with 'Unable to load DO_API_TOKEN'
+
+- name: Provision Digital Ocean Droplets
+  hosts: 127.0.0.1
+  connection: local
+  roles:
+    - digitalocean
+
+- name: Gather facts
+  hosts: all
+  gather_facts: True
+
+- name: Configure the sample project db server
+  hosts: altvr-db
+  vars:
+    - update_apt_cache: yes
+    - env: development
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/digitalocean.yml
+  roles:
+    - base
+    - db
+
+- name: Configure the sample project web server
+  hosts: altvr-web
+  vars:
+    - setup_git_repo: yes
+    - update_apt_cache: yes
+    - env: development
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/digitalocean.yml
+  roles:
+    - base
+    - web
+

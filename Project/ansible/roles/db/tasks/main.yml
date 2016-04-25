@@ -1,0 +1,53 @@
+---
+
+- name: Install PostgreSQL
+  apt: name={{ item }} update_cache={{ update_apt_cache }} state=installed
+  with_items:
+    - postgresql
+    - postgresql-contrib
+    - python-psycopg2
+  tags: packages
+
+- name: Ensure the PostgreSQL service is running
+  service: name=postgresql state=started enabled=yes
+
+- name: Ensure database is created
+  sudo_user: postgres
+  postgresql_db: name={{ db_name }}
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 template='template0'
+                 state=present
+
+- name: Ensure user has access to the database
+  sudo_user: postgres
+  postgresql_user: db={{ db_name }}
+                   name={{ db_user }}
+                   password={{ db_password }}
+                   priv=ALL
+                   state=present
+
+- name: Ensure user does not have unnecessary privileges
+  sudo_user: postgres
+  postgresql_user: name={{ db_user }}
+                   role_attr_flags=NOSUPERUSER,NOCREATEDB
+                   state=present
+
+- name: Configure Postgres host-based authentication config
+  template: src=templates/pg_hba.conf.j2 dest=/etc/postgresql/9.3/main/pg_hba.conf owner=postgres group=postgres
+  notify: restart postgresql
+
+- name: Postgres listen on private network and localhost
+  lineinfile: dest=/etc/postgresql/9.3/main/postgresql.conf regexp="^#?listen_addresses" line="listen_addresses = '127.0.0.1,{{ item }}'" state=present backup=yes
+  with_items:
+    - "{{ hostvars[inventory_hostname].ansible_eth1.ipv4.address }}"
+  notify:
+    - restart postgresql
+  tags:
+    - postgres
+
+- name: Include datadog integrations setup
+  include: setup_datadog_integrations.yml
+  tags: monitoring
+  when: datadog_enabled

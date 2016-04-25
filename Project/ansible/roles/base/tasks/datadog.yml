@@ -1,0 +1,16 @@
+---
+
+- name: trust datadog key
+  apt_key: id=0xC7A7DA52 state=present keyserver=keyserver.ubuntu.com
+
+- apt_repository:
+    repo='deb https://apt.datadoghq.com/ stable main'
+    state=present
+    update_cache=yes
+
+- apt: name=datadog-agent state=present update_cache=yes force=yes
+
+- template: src=../templates/datadog.conf.j2 dest=/etc/dd-agent/datadog.conf owner=dd-agent
+  notify: restart datadog-agent
+
+- service: name=datadog-agent state=started enabled=yes

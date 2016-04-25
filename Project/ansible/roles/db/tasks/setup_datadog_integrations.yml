@@ -1,0 +1,16 @@
+---
+
+- name: Add Datadog postgresql metrics template
+  template: src=../templates/postgres.yaml.j2 dest=/etc/dd-agent/conf.d/postgres.yaml
+  notify: restart datadog-agent
+
+- name: Add Postgresql user for Datadog
+  sudo_user: postgres
+  postgresql_user: 
+    name: datadog
+    password: "{{ datadog_postgres_password }}"
+    role_attr_flags: NOSUPERUSER
+    priv: pg_stat_database:SELECT
+    db: postgres
+    state: present
+
