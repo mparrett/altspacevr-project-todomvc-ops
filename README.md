@@ -9,7 +9,7 @@ Nginx is used as a reverse proxy with SSL termination in front of gunicorn, whic
 
 Currently, one machine is provisioned for the web server and another for the database. To be kind to aging Macbooks, the Vagrant Virtualbox VMs are given minimal memory resources.
 
-The instructions below were written with MacOS in mind, but could be adapted to other platforms.
+The instructions below were written with MacOS in mind but could easily be adapted to other platforms.
 
 ### Design Decisions / Principles
 
@@ -24,6 +24,8 @@ It seems quite reasonable that this basic setup could eventually evolve into a c
 Ansible is used to provision and configure the resources for the TodoMVC app. Dynamic Ansible inventories are utilized and both Vagrant and Digital Ocean were tested as providers. Extending to AWS and other providers would be straightforward.
 
 ## Getting Started
+
+If you're lucky you might already have the pre-requisites installed and you can immediately bring up the Vagrant environment. Otherwise it's pretty straightforward to get up and running:
 
 1. Verify the requirements below are installed on your local development machine.
 
@@ -41,6 +43,8 @@ vagrant up
 Once Vagrant provisions and configures the machines, visit [https://192.168.33.10](https://192.168.33.10) and enjoy some TODOs.
 
 Note: When running playbooks, Ansible needs to find `ansible.cfg` in the current directory. As a result, you'll need to be in `altvr-project-todomvc-ops` when running them.
+
+Note: If you have other applications binding port 80, you'll want to disable those temporarily. Alternatively you can modify the Vagrantfile to forward port 8080 to port 80 on the guest VM.
 
 ### Install Requirements
 
@@ -103,11 +107,13 @@ Idea: Deployment events could be sent to DataDog so they can be overlaid on appr
 
 ## Limitations
 
-Some external dependencies are usually reliable but could potentially cause issues, such as Vagrant boxes, pip, and Ubuntu package repositories. 
+Some external dependencies are usually reliable but could potentially cause issues, such as Vagrant boxes, pip, and Ubuntu package repositories.
+
+The use of bulky VMs will ultimately become a limitation as this application and its environment become more complex. See the note below about containers.
 
 ## Production Considerations
 
-This sample development environment demonstration is rather basic and would at least require a handful of considerations before promoted to a production environment:
+This sample development environment demonstration is rather basic and would require _at least_ a handful of considerations before promoted to a production environment:
 
 - Usual production considerations (DNS, SSL cert, desired cloud provider, CDN, budget constraints, etc.)
 - Secure/harden machines and software
