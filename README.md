@@ -22,8 +22,8 @@ Ansible is used to provision and configure the resources for the TodoMVC app. Dy
 Make sure the requirements below are met and then get TodoMVC running on your system with one command (after cloning).
 
 ```
-git clone git@github.com:mparrett/altvr-todomvc-django.git
-cd altvr-todomvc-django
+git clone git@github.com:mparrett/altspacevr-project-todomvc-ops.git 
+cd altvr-project-todomvc-ops
 ```
 
 ```
