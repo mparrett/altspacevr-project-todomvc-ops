@@ -85,7 +85,7 @@ The sample Django app provided with the challenge is here on [GitHub](https://gi
 
 The project demonstrates basic Datadog integration for monitoring and alerting.
 
-![](http://i.imgur.com/nuAGoDa.png)
+![](http://i.imgur.com/7bqTdxw.png)
 
 ### Integrations
 
