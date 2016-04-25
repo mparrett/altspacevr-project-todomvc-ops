@@ -9,7 +9,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "altvr-db" do |db|
     db.vm.box = "ubuntu/trusty64"
     db.vm.hostname = "altvr-db"
-    #db.vm.network "forwarded_port", guest: 5432, host: 5432
     db.vm.network "private_network", ip: "192.168.33.11"
     db.vm.provider "virtualbox" do |vb|
 		vb.customize ["modifyvm", :id, "--memory", "384"]
@@ -18,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		ansible.host_key_checking = false
 		ansible.extra_vars = { ansible_ssh_user: 'vagrant', env: 'vagrant', create_swap_file: true }
 		ansible.verbose = "vv"
-		ansible.playbook = "dbservers.yml"
+		ansible.playbook = "ansible/dbservers.yml"
         ansible.groups = { "dbservers" => ["altvr-db"] }
 	end
   end
@@ -27,7 +26,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     web.vm.hostname = "altvr-web"
     #web.vm.network "forwarded_port", guest: 80, host: 8080
     web.vm.network "private_network", ip: "192.168.33.10"
-    config.vm.synced_folder "~/projects/AltspaceVR/altspacevr-project-todomvc-ops/Project/todomvc-django", "/tmp/todomvc-synced"
     web.vm.provider "virtualbox" do |vb|
 		vb.customize ["modifyvm", :id, "--memory", "384"]
     end
@@ -35,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		ansible.host_key_checking = false
 		ansible.extra_vars = { ansible_ssh_user: 'vagrant', env: 'vagrant', create_swap_file: true }
 		ansible.verbose = "vv"
-		ansible.playbook = "webservers.yml"
+		ansible.playbook = "ansible/webservers.yml"
         ansible.groups = { "webservers" => ["altvr-web"] }
 	end
   end
